@@ -1,0 +1,11 @@
+{
+  "name": "e2e-tests",
+  "private": true,
+  "version": "0.0.1",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "license": "(Apache-2.0 AND MIT)",
+  "description": "Elastic IPFS e2e test suite"
+}
