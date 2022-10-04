@@ -3,9 +3,31 @@
   "private": true,
   "version": "0.0.1",
   "main": "index.js",
+  "engines": {
+    "node": "18"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test:regression": "LOG_LEVEL=error node regression.js",
+    "test:load": "LOG_LEVEL=error node load.js",
+    "format": "standard --fix",
+    "lint": "standard"
   },
   "license": "(Apache-2.0 AND MIT)",
-  "description": "Elastic IPFS e2e test suite"
+  "description": "Elastic IPFS e2e test suite",
+  "dependencies": {
+    "@web3-storage/libp2p-noise": "^6.0.0",
+    "autocannon": "^7.10.0",
+    "fastify": "^4.7.0",
+    "get-port": "^6.1.2",
+    "it-length-prefixed": "^6.0.1",
+    "it-pipe": "^2.0.4",
+    "libp2p": "^0.34.0",
+    "libp2p-mplex": "^0.10.7",
+    "libp2p-websockets": "^0.16.2",
+    "p-queue": "^7.3.0",
+    "pino": "^8.6.1",
+    "pino-pretty": "^9.1.0",
+    "protobufjs": "^7.1.2",
+    "standard": "^17.0.0"
+  }
 }
