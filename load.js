@@ -6,8 +6,6 @@ const autocannon = require('autocannon')
 const helper = require('./helper')
 const load = require('./helper/load')
 
-// TODO doc
-
 const PROXY_CONCURRENCY = process.env.PROXY_CONCURRENCY ? parseInt(process.env.PROXY_CONCURRENCY) : 8
 const TARGET_ENV = process.env.TARGET_ENV ?? 'local'
 const ONLY = process.env.ONLY

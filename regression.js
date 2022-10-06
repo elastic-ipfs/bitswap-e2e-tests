@@ -6,8 +6,6 @@ const autocannon = require('autocannon')
 const helper = require('./helper')
 const regression = require('./helper/regression')
 
-// TODO doc
-
 const TARGET_ENV = process.env.TARGET_ENV ?? 'local'
 const TEST_ENV = process.env.TEST_ENV ?? 'dev'
 const UPDATE_SNAPS = !!process.env.UPDATE_SNAPS
