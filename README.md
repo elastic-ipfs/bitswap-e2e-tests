@@ -172,7 +172,7 @@ prod     /dns4/elastic.dag.house/tcp/443/wss/p2p/bafzbeibhqavlasjc7dvbiopygwncnr
 
 ### http proxy
 
-For doing that, the `http-proxy` provide an http interface to the `bitswap-peer`, allowing to send requests (and get responses) by http instead of the `libp2p` protocol (over `websocket`) - that is was the `http-proxy` service actually does.
+The `http-proxy` provides an http interface to the `bitswap-peer` to be able to use common http tools for testing and benchmarks, allowing to send requests (and get responses) by http instead of the `libp2p` protocol (over `websocket`) - that is was the `http-proxy` service actually does.
 
 #### how to use proxy
 
