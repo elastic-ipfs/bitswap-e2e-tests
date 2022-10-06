@@ -11,6 +11,7 @@ const load = require('./helper/load')
 const PROXY_CONCURRENCY = process.env.PROXY_CONCURRENCY ? parseInt(process.env.PROXY_CONCURRENCY) : 8
 const TARGET_ENV = process.env.TARGET_ENV ?? 'local'
 const ONLY = process.env.ONLY
+const TEST_ENV = process.env.TEST_ENV ?? 'dev'
 const TEST_DURATION = process.env.TEST_DURATION ? parseInt(process.env.TEST_DURATION) : 60
 const TEST_AMOUNT = process.env.TEST_AMOUNT ? parseInt(process.env.TEST_AMOUNT) : undefined
 const TEST_CONNECTIONS = process.env.TEST_CONNECTIONS ? parseInt(process.env.TEST_CONNECTIONS) : 10e3
@@ -23,7 +24,7 @@ async function test () {
   })
 
   const requests = await load.loadCases({
-    dir: path.join(__dirname, './snaps/load'),
+    dir: path.join(__dirname, './snaps', TEST_ENV, 'load'),
     only: ONLY
   })
 
