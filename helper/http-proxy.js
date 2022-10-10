@@ -1,6 +1,6 @@
 'use strict'
 
-const helper = require('../test/e2e/helper')
+const helper = require('./index')
 
 process.env.TARGET = process.env.TARGET ?? 'local'
 
