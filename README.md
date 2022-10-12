@@ -83,6 +83,10 @@ Run the test with only the specific snap file, for example, `ONLY=single-block-d
 
 Enable verbosity on assertions.
 
+- **RESULT_FILE** (default `result/regression.json`)
+
+Path to save json result file from `autocannon`, to be used in comparison.
+
 #### Examples
 
 Run in local with dev scenario (for local development)
@@ -133,11 +137,15 @@ See [targets](#targets)
 
 The test scenarios to load, are defined in the `/snaps` folder; currently supported values: `dev`, `staging`.
 
-- **TEST_CONNECTIONS** (default `1k`)
+- **TEST_CLIENTS** (default `10`)
+
+Concurrent clients to run load test: for every client, will be run `TEST_CONNECTIONS` concurrent requests for `TEST_DURATION`.
+
+- **TEST_CONNECTIONS** (default `250`)
 
 Concurrent connections for `autocannon`.
 
-- **TEST_DURATION** (default `60 secs`)
+- **TEST_DURATION** (default `30 secs`)
 
 Test duration, in seconds - so it will run N connections for X seconds.
 
@@ -148,6 +156,10 @@ Timeout for each response, in seconds.
 - **TEST_AMOUNT**
 
 It overrides `duration`.
+
+- **RESULT_FILE** (default `result/load.json`)
+
+Path to save json result file from `autocannon`, to be used in comparison.
 
 #### Examples
 
@@ -173,6 +185,12 @@ Override default connections and durations
 
 ```bash
 TARGET_ENV=dev TEST_CONNECTIONS=100 TEST_DURATION=60 npm run test:load
+```
+
+Override default clients
+
+```bash
+TARGET_ENV=dev TEST_CLIENTS=6 npm run test:load
 ```
 
 Override default durations by the amount of requests

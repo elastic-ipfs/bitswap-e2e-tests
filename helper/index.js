@@ -25,16 +25,23 @@ async function getFreePort () {
   return getPort()
 }
 
-async function startProxy ({ target, concurrency = 8, port }) {
+// pendingBlocks are never cleared because of concurrency
+const pendingBlocks = {}
+const pendingRequests = {}
+
+// the proxy server is intended to run only for testing, not to be an ongoing service
+async function startProxy ({ target, concurrency = 8, port, name = 'default' }) {
   const PQueue = await loadEsmModule('p-queue')
   const queue = new PQueue({ concurrency: parseInt(concurrency) })
   if (!port) {
     port = await getFreePort()
   }
 
+  pendingBlocks[name] = new Map()
+  pendingRequests[name] = new Map()
   const service = fastify({ logger: false })
 
-  const proxy = await proxyPeer(target)
+  const proxy = await proxyPeer({ target, name })
 
   service.post('/', (request, response) => {
     if (!Array.isArray(request.body.blocks)) {
@@ -44,7 +51,7 @@ async function startProxy ({ target, concurrency = 8, port }) {
 
     response.type('application/json')
 
-    queue.add(() => proxyRequest({ proxy, blocks: request.body.blocks, request, response }))
+    queue.add(() => proxyRequest({ proxy, blocks: request.body.blocks, request, response, name }))
   })
 
   await service.listen({ port })
@@ -75,7 +82,7 @@ async function startProxy ({ target, concurrency = 8, port }) {
   }
 }
 
-async function proxyPeer (target) {
+async function proxyPeer ({ target, name }) {
   const node = await libp2p.create({
     modules: {
       transport: [Websockets],
@@ -95,7 +102,7 @@ async function proxyPeer (target) {
     proxy.connections.push(connection)
 
     connection.on('data', data => {
-      proxyResponse({ data, connection })
+      proxyResponse({ data, connection, name })
     })
 
     connection.on('error', error => {
@@ -107,17 +114,13 @@ async function proxyPeer (target) {
   return proxy
 }
 
-// pendingBlocks are never cleared because of concurrency
-const pendingBlocks = new Map()
-const pendingRequests = new Map()
-
-function proxyRequest ({ proxy, blocks, request, response }) {
+function proxyRequest ({ proxy, blocks, request, response, name }) {
   // console.debug(' +++ proxyRequest', request.id)
   blocks = blocks.map(block => ({ cid: CID.parse(block.cid.trim()), type: block.type }))
 
   const pending = { response, data: {}, blocks: new Set() }
   // console.debug('pendingRequests.set', request.id)
-  pendingRequests.set(request.id, pending)
+  pendingRequests[name].set(request.id, pending)
 
   const entries = []
   for (let i = 0; i < blocks.length; i++) {
@@ -134,13 +137,13 @@ function proxyRequest ({ proxy, blocks, request, response }) {
 
     pending.blocks.add(id)
     // console.debug('pendingBlocks.get', id)
-    const c = pendingBlocks.get(id)
+    const c = pendingBlocks[name].get(id)
     if (c) {
       // console.debug('pendingBlocks.get - push', request.id)
       c.push(request.id)
     } else {
       // console.debug('pendingBlocks.get - set', request.id)
-      pendingBlocks.set(id, [request.id])
+      pendingBlocks[name].set(id, [request.id])
     }
   }
 
@@ -149,7 +152,7 @@ function proxyRequest ({ proxy, blocks, request, response }) {
   )
 }
 
-function proxyResponse ({ data, connection }) {
+function proxyResponse ({ data, connection, name }) {
   const message = RawMessage.decode(data)
   const blocks = message.blocks.map(block => ({ type: 'i', block }))
     .concat(message.blockPresences.map(block => ({ type: 'i', block })))
@@ -169,13 +172,13 @@ function proxyResponse ({ data, connection }) {
     let id = prefix + cid
 
     // console.debug('pendingBlocks.get', id)
-    let requestIds = pendingBlocks.get(id)
+    let requestIds = pendingBlocks[name].get(id)
     if (!requestIds) {
       if (prefix === 'i:') {
         // case for "not found" data block, which response is "i:"
         prefix = 'd:'
         id = prefix + cid
-        requestIds = pendingBlocks.get(id)
+        requestIds = pendingBlocks[name].get(id)
       }
     }
     if (!requestIds) {
@@ -187,7 +190,7 @@ function proxyResponse ({ data, connection }) {
     while (requestIds.length > 0) {
       requestId = requestIds.shift()
       // console.debug('pendingRequests.get', requestId)
-      const r = pendingRequests.get(requestId)
+      const r = pendingRequests[name].get(requestId)
       if (!r) {
         console.error('!!! request not found for block', { requestId, id })
         continue
@@ -203,7 +206,7 @@ function proxyResponse ({ data, connection }) {
 
       if (r.blocks.size < 1) {
         r.response.send(JSON.stringify(r.data))
-        pendingRequests.delete(requestId)
+        pendingRequests[name].delete(requestId)
       }
     }
   }

@@ -49,7 +49,7 @@ for (const group of [
 const LABEL1 = 'test #1'
 const LABEL2 = 'test #2'
 
-async function main(resultFile1, resultFile2) {
+async function main (resultFile1, resultFile2) {
   const result1 = require(path.join(process.cwd(), resultFile1))
   const result2 = require(path.join(process.cwd(), resultFile2))
 
@@ -78,7 +78,7 @@ async function main(resultFile1, resultFile2) {
   }
 }
 
-function print(compare) {
+function print (compare) {
   const p = new Table()
 
   for (const row of compare) {
@@ -93,26 +93,26 @@ function print(compare) {
   p.printTable()
 }
 
-function color(v, reverse, compare = true) {
+function color (v, reverse, compare = true) {
   if (v === 0 || !compare) {
     return 'white'
   }
 
-  if(reverse) {
+  if (reverse) {
     return v > 0 ? 'red' : 'green'
   }
 
   return v > 0 ? 'green' : 'red'
 }
 
-function diff(v1, v2) {
+function diff (v1, v2) {
   if (v1 === v2) {
     return 0
   }
   return 100 - (v1 / v2 * 100)
 }
 
-function format(v) {
+function format (v) {
   if (v === 0) {
     return '='
   }
@@ -121,10 +121,10 @@ function format(v) {
     return '+ ' + v.toFixed(2) + ' %'
   }
 
-  return '- ' + (v*-1).toFixed(2) + ' %'
+  return '- ' + (v * -1).toFixed(2) + ' %'
 }
 
-function value(v, um) {
+function value (v, um) {
   if (um === 'unit') { return v }
   if (um === 'ms') { return v + ' ms' }
   if (um === 'bytes') { return v ? byteSize(v) : '-' }
