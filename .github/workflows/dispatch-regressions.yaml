@@ -10,6 +10,9 @@ on:
         options:
           - dev
           - staging
+permissions:
+  contents: read
+  packages: write
 jobs:
   regression:
     runs-on: ubuntu-latest
