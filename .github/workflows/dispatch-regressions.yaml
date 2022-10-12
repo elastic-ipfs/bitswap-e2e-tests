@@ -1,0 +1,36 @@
+name: Regression Tests
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: 'Environment to target'
+        required: true
+        default: dev
+        type: choice
+        options:
+          - dev
+          - staging
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup NodeJS
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.x
+#      - name: Restore cached dependencies
+#        uses: actions/cache@v3
+#        with:
+#          path: node_modules
+#          key: node-modules-${{ hashFiles('package.json') }}
+#      - name: npm auth
+#        uses: jgierer12/npm-auth-gpr@v1
+#        with:
+#          token: ${{ secrets.GITHUB_TOKEN }}
+#      - name: Install dependencies
+#        uses: bahmutov/npm-install@v1
+#      - name: Execute Regression Tests
+#        run: npm run test:regression
+
