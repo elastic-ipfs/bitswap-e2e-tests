@@ -39,7 +39,7 @@ jobs:
       - name: Execute Regression Tests
         run: npm run test:regression
         env:
-          TARGET_ENV: inputs.target
-          TEST_ENV: inputs.target
+          TARGET_ENV: ${{ inputs.target }}
+          TEST_ENV: ${{ inputs.target }}
 
 
