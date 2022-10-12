@@ -41,17 +41,18 @@ To compare performance of test (usually on different version of the service) you
 use env vars for bench too
 
 ```bash
-TARGET_ENV=dev ./bench/bench.sh current
-TARGET_ENV=dev ./bench/bench.sh next
+cd bench
+TARGET_ENV=dev ./bench.sh current
+TARGET_ENV=dev ./bench.sh next
 ```
 
 then compare results
 
 ```bash
-node compare-results.js result/current-regression-1.json result/next-regression-1.json
-node compare-results.js result/current-regression-2.json result/next-regression-2.json
-node compare-results.js result/current-load-1.json result/next-load-2.json
-node compare-results.js result/current-load-2.json result/next-load-2.json
+node compare-results.js bench/result/current-regression-1.json bench/result/next-regression-1.json
+node compare-results.js bench/result/current-regression-2.json bench/result/next-regression-2.json
+node compare-results.js bench/result/current-load-1.json bench/result/next-load-2.json
+node compare-results.js bench/result/current-load-2.json bench/result/next-load-2.json
 ```
 
 ---
@@ -141,7 +142,7 @@ The test scenarios to load, are defined in the `/snaps` folder; currently suppor
 
 Concurrent clients to run load test: for every client, will be run `TEST_CONNECTIONS` concurrent requests for `TEST_DURATION`.
 
-- **TEST_CONNECTIONS** (default `250`)
+- **TEST_CONNECTIONS** (default `50`)
 
 Concurrent connections for `autocannon`.
 

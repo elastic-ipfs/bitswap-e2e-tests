@@ -14,7 +14,7 @@ const TEST_ENV = process.env.TEST_ENV ?? 'dev'
 const TEST_CLIENTS = process.env.TEST_CLIENTS ? parseInt(process.env.TEST_CLIENTS) : 10
 const TEST_DURATION = process.env.TEST_DURATION ? parseInt(process.env.TEST_DURATION) : 30 // sec
 const TEST_AMOUNT = process.env.TEST_AMOUNT ? parseInt(process.env.TEST_AMOUNT) : undefined
-const TEST_CONNECTIONS = process.env.TEST_CONNECTIONS ? parseInt(process.env.TEST_CONNECTIONS) : 250
+const TEST_CONNECTIONS = process.env.TEST_CONNECTIONS ? parseInt(process.env.TEST_CONNECTIONS) : 1000
 const TEST_TIMEOUT = process.env.TEST_TIMEOUT ? parseInt(process.env.TEST_TIMEOUT) : 5 * 60 // sec
 const RESULT_FILE = process.env.RESULT_FILE ?? 'result/load.json'
 
