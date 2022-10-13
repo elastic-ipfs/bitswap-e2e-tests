@@ -128,6 +128,8 @@ The purpose of the regression test is to assert the system can handle a huge pee
 Note that the test expects the service to respond, but it doesn't assert the correctness of such responses.  
 The default options will run a load test against the local `bitswap-peer` service assuming it's pointing to `dev` storage.
 
+**Note** current default settings (5 clients x 200 connections x 30 secs) are the current reference (in `dev`).
+
 #### Options
 
 - **TARGET_ENV** (default `local`)
@@ -138,11 +140,11 @@ See [targets](#targets)
 
 The test scenarios to load, are defined in the `/snaps` folder; currently supported values: `dev`, `staging`.
 
-- **TEST_CLIENTS** (default `10`)
+- **TEST_CLIENTS** (default `5`)
 
 Concurrent clients to run load test: for every client, will be run `TEST_CONNECTIONS` concurrent requests for `TEST_DURATION`.
 
-- **TEST_CONNECTIONS** (default `50`)
+- **TEST_CONNECTIONS** (default `200`)
 
 Concurrent connections for `autocannon`.
 
