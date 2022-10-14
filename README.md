@@ -30,29 +30,13 @@ or
 npm run test:load
 ```
 
-#### bench
-
-To compare performance of test (usually on different version of the service) you can run the `bench` script on the targets, get the results, the run the `compare` script to visualize the difference.
+#### compare results
 
 ```bash
-./bench/bench.sh $label
-```
-
-use env vars for bench too
-
-```bash
-cd bench
-TARGET_ENV=dev ./bench.sh current
-TARGET_ENV=dev ./bench.sh next
-```
-
-then compare results
-
-```bash
-node compare-results.js bench/result/current-regression-1.json bench/result/next-regression-1.json
-node compare-results.js bench/result/current-regression-2.json bench/result/next-regression-2.json
-node compare-results.js bench/result/current-load-1.json bench/result/next-load-2.json
-node compare-results.js bench/result/current-load-2.json bench/result/next-load-2.json
+node compare-results.js result/current-regression-1.json result/next-regression-1.json
+node compare-results.js result/current-regression-2.json result/next-regression-2.json
+node compare-results.js result/current-load-1.json result/next-load-2.json
+node compare-results.js result/current-load-2.json result/next-load-2.json
 ```
 
 ---
@@ -221,7 +205,7 @@ The `http-proxy` provides an http interface to the `bitswap-peer` to be able to 
 
 #### how to use proxy
 
-The test scripts
+TODO
 
 Then you can query it using http tools, for example, `curl` and `autocannon`
 
