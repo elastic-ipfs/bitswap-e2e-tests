@@ -1,0 +1,20 @@
+{
+  "test": {
+    "amount": 50,
+    "connections": 10,
+    "timeout": 60
+  },
+  "request": {
+    "blocks": [
+      {
+        "type": "i",
+        "cid": "Qma6D7Q76mbQKV23WbrvpgkF5DHz2NuQcmBwakckM6pNwk"
+      }
+    ]
+  },
+  "response": {
+    "Qma6D7Q76mbQKV23WbrvpgkF5DHz2NuQcmBwakckM6pNwk": {
+      "info": "FOUND"
+    }
+  }
+}
