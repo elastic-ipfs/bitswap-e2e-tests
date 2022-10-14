@@ -1,5 +1,6 @@
 'use strict'
 
+const fs = require('fs/promises')
 const path = require('path')
 const autocannon = require('autocannon')
 
@@ -12,6 +13,7 @@ const UPDATE_SNAPS = !!process.env.UPDATE_SNAPS
 const ONLY = process.env.ONLY
 const VERBOSE = !!process.env.VERBOSE
 const PROXY_CONCURRENCY = process.env.PROXY_CONCURRENCY ? parseInt(process.env.PROXY_CONCURRENCY) : 8
+const RESULT_FILE = process.env.RESULT_FILE ?? 'result/regression.json'
 
 async function test () {
   const service = await helper.startProxy({
@@ -31,6 +33,7 @@ async function test () {
   // match them with snap
   const start = Date.now()
   let done = 0
+  const results = {}
   for (const case_ of c.cases) {
     console.log(' *** running', case_.file, case_.test, '...')
     autocannon({
@@ -44,17 +47,18 @@ async function test () {
       console.log(' *** done', case_.file, case_.count)
       if (error) { console.error({ error }) }
 
-      // console.log({ result })
+      results[case_.file] = result
       console.log(autocannon.printResult(result))
 
       if (++done === c.cases.length) {
-        end({ start, service })
+        end({ start, service, results })
       }
     })
   }
 }
 
-async function end ({ start, service }) {
+async function end ({ start, service, results }) {
+  await fs.writeFile(path.join(__dirname, RESULT_FILE), JSON.stringify(results, null, 2), 'utf8')
   console.log('done in ', Date.now() - start, 'ms')
   service.close()
 }

@@ -30,6 +30,15 @@ or
 npm run test:load
 ```
 
+#### compare results
+
+```bash
+node compare-results.js result/current-regression-1.json result/next-regression-1.json
+node compare-results.js result/current-regression-2.json result/next-regression-2.json
+node compare-results.js result/current-load-1.json result/next-load-2.json
+node compare-results.js result/current-load-2.json result/next-load-2.json
+```
+
 ---
 
 ### Regression test
@@ -58,6 +67,10 @@ Run the test with only the specific snap file, for example, `ONLY=single-block-d
 - **VERBOSE** (default `false`)
 
 Enable verbosity on assertions.
+
+- **RESULT_FILE** (default `result/regression.json`)
+
+Path to save json result file from `autocannon`, to be used in comparison.
 
 #### Examples
 
@@ -99,6 +112,8 @@ The purpose of the regression test is to assert the system can handle a huge pee
 Note that the test expects the service to respond, but it doesn't assert the correctness of such responses.  
 The default options will run a load test against the local `bitswap-peer` service assuming it's pointing to `dev` storage.
 
+**Note** current default settings (5 clients x 200 connections x 30 secs) are the current reference (in `dev`).
+
 #### Options
 
 - **TARGET_ENV** (default `local`)
@@ -109,11 +124,15 @@ See [targets](#targets)
 
 The test scenarios to load, are defined in the `/snaps` folder; currently supported values: `dev`, `staging`.
 
-- **TEST_CONNECTIONS** (default `10k`)
+- **TEST_CLIENTS** (default `5`)
+
+Concurrent clients to run load test: for every client, will be run `TEST_CONNECTIONS` concurrent requests for `TEST_DURATION`.
+
+- **TEST_CONNECTIONS** (default `200`)
 
 Concurrent connections for `autocannon`.
 
-- **TEST_DURATION** (default `60 secs`)
+- **TEST_DURATION** (default `30 secs`)
 
 Test duration, in seconds - so it will run N connections for X seconds.
 
@@ -124,6 +143,10 @@ Timeout for each response, in seconds.
 - **TEST_AMOUNT**
 
 It overrides `duration`.
+
+- **RESULT_FILE** (default `result/load.json`)
+
+Path to save json result file from `autocannon`, to be used in comparison.
 
 #### Examples
 
@@ -151,6 +174,12 @@ Override default connections and durations
 TARGET_ENV=dev TEST_CONNECTIONS=100 TEST_DURATION=60 npm run test:load
 ```
 
+Override default clients
+
+```bash
+TARGET_ENV=dev TEST_CLIENTS=6 npm run test:load
+```
+
 Override default durations by the amount of requests
 
 ```bash
@@ -176,7 +205,7 @@ The `http-proxy` provides an http interface to the `bitswap-peer` to be able to 
 
 #### how to use proxy
 
-The test scripts
+TODO
 
 Then you can query it using http tools, for example, `curl` and `autocannon`
 
