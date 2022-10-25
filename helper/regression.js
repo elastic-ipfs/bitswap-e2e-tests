@@ -1,6 +1,7 @@
 'use strict'
 
 const fs = require('fs/promises')
+const { mkdirSync } = require('fs')
 const path = require('path')
 const assert = require('assert')
 
@@ -43,6 +44,7 @@ async function loadCases ({ dir, request, only, updateSnaps = false, verbose = f
             if (updateSnaps) {
               verbosity('update snap', filePath)
               c.response = JSON.parse(body)
+              mkdirSync(path.dirname(filePath), { recursive:true })
               fs.writeFile(filePath, JSON.stringify(c, null, 2), 'utf8')
             }
           }
