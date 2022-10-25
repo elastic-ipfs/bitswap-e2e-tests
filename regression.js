@@ -1,6 +1,7 @@
 'use strict'
 
 const fs = require('fs/promises')
+const { mkdirSync } = require('fs')
 const path = require('path')
 const autocannon = require('autocannon')
 
@@ -58,7 +59,9 @@ async function test () {
 }
 
 async function end ({ start, service, results }) {
-  await fs.writeFile(path.join(__dirname, RESULT_FILE), JSON.stringify(results, null, 2), 'utf8')
+  const resultFile = path.join(__dirname, RESULT_FILE)
+  mkdirSync(path.dirname(resultFile), { recursive:true })
+  await fs.writeFile(resultFile, JSON.stringify(results, null, 2), 'utf8')
   console.log('done in ', Date.now() - start, 'ms')
   service.close()
 }
