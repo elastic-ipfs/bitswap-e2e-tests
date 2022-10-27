@@ -1,10 +1,9 @@
-'use strict'
 
-const path = require('path')
-
-const { Table } = require('console-table-printer')
-const byteSize = require('byte-size')
-const op = require('object-path')
+import path from 'path'
+import fs from 'fs/promises'
+import { Table } from 'console-table-printer'
+import byteSize from 'byte-size'
+import op from 'object-path'
 
 const items = [
   { path: 'connections', um: 'unit' },
@@ -50,8 +49,8 @@ const LABEL1 = 'test #1'
 const LABEL2 = 'test #2'
 
 async function main (resultFile1, resultFile2) {
-  const result1 = require(path.join(process.cwd(), resultFile1))
-  const result2 = require(path.join(process.cwd(), resultFile2))
+  const result1 = JSON.parse(await fs.readFile(path.join(process.cwd(), resultFile1), 'utf8'))
+  const result2 = JSON.parse(await fs.readFile(path.join(process.cwd(), resultFile2), 'utf8'))
 
   for (const test of Object.keys(result1)) {
     // TODO if(!result2[test])

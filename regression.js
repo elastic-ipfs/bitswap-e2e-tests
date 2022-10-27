@@ -1,12 +1,12 @@
-'use strict'
 
-const fs = require('fs/promises')
-const { mkdirSync } = require('fs')
-const path = require('path')
-const autocannon = require('autocannon')
+import fs from 'fs/promises'
+import { mkdirSync } from 'fs'
+import path from 'path'
+import autocannon from 'autocannon'
 
-const helper = require('./helper')
-const regression = require('./helper/regression')
+import * as helper from './helper/index.js'
+import * as regression from './helper/regression.js'
+import { dirname } from './lib/util.js'
 
 const TARGET_ENV = process.env.TARGET_ENV ?? 'local'
 const TEST_ENV = process.env.TEST_ENV ?? 'dev'
@@ -23,7 +23,7 @@ async function test () {
   })
 
   const c = await regression.loadCases({
-    dir: path.join(__dirname, './snaps', TEST_ENV, 'regression'),
+    dir: path.join(dirname(import.meta.url), './snaps', TEST_ENV, 'regression'),
     request: service.request,
     updateSnaps: UPDATE_SNAPS,
     only: ONLY,
@@ -59,8 +59,8 @@ async function test () {
 }
 
 async function end ({ start, service, results }) {
-  const resultFile = path.join(__dirname, RESULT_FILE)
-  mkdirSync(path.dirname(resultFile), { recursive:true })
+  const resultFile = path.join(dirname(import.meta.url), RESULT_FILE)
+  mkdirSync(path.dirname(resultFile), { recursive: true })
   await fs.writeFile(resultFile, JSON.stringify(results, null, 2), 'utf8')
   console.log('done in ', Date.now() - start, 'ms')
   service.close()

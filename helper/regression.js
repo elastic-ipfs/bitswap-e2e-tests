@@ -1,9 +1,8 @@
-'use strict'
 
-const fs = require('fs/promises')
-const { mkdirSync } = require('fs')
-const path = require('path')
-const assert = require('assert')
+import fs from 'fs/promises'
+import { mkdirSync } from 'fs'
+import path from 'path'
+import assert from 'assert'
 
 function noop () { }
 // TODO use process.stodout
@@ -25,7 +24,7 @@ async function loadCases ({ dir, request, only, updateSnaps = false, verbose = f
     }
     const filePath = path.join(dir, file)
     try {
-      const c = require(filePath)
+      const c = JSON.parse(await fs.readFile(filePath, 'utf8'))
       const response = JSON.stringify(c.response)
 
       const case_ = {
@@ -44,7 +43,7 @@ async function loadCases ({ dir, request, only, updateSnaps = false, verbose = f
             if (updateSnaps) {
               verbosity('update snap', filePath)
               c.response = JSON.parse(body)
-              mkdirSync(path.dirname(filePath), { recursive:true })
+              mkdirSync(path.dirname(filePath), { recursive: true })
               fs.writeFile(filePath, JSON.stringify(c, null, 2), 'utf8')
             }
           }
@@ -79,6 +78,6 @@ async function loadCases ({ dir, request, only, updateSnaps = false, verbose = f
   return requests
 }
 
-module.exports = {
+export {
   loadCases
 }

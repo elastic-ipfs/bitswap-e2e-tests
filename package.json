@@ -1,36 +1,37 @@
 {
   "name": "e2e-tests",
   "private": true,
-  "version": "0.0.1",
-  "main": "index.js",
+  "version": "0.1.0",
   "engines": {
-    "node": "18"
+    "node": "18.11.0"
   },
+  "type": "module",
   "scripts": {
-    "test:regression": "LOG_LEVEL=error node regression.js",
-    "test:load": "LOG_LEVEL=error node load.js",
+    "test:regression": "LOG_LEVEL=error LOG_PRETTY=1 node regression.js",
+    "test:load": "LOG_LEVEL=error LOG_PRETTY=1 node load.js",
     "format": "standard --fix",
     "lint": "standard"
   },
   "license": "(Apache-2.0 AND MIT)",
   "description": "Elastic IPFS e2e test suite",
   "dependencies": {
-    "@web3-storage/libp2p-noise": "^6.0.0",
-    "autocannon": "^7.10.0",
-    "byte-size": "^8.1.0",
-    "console-table-printer": "^2.11.1",
-    "fastify": "^4.7.0",
-    "get-port": "^6.1.2",
-    "it-length-prefixed": "^6.0.1",
-    "it-pipe": "^2.0.4",
-    "libp2p": "^0.34.0",
-    "libp2p-mplex": "^0.10.7",
-    "libp2p-websockets": "^0.16.2",
-    "object-path": "^0.11.8",
-    "p-queue": "^7.3.0",
-    "pino": "^8.6.1",
-    "pino-pretty": "^9.1.0",
-    "protobufjs": "^7.1.2",
-    "standard": "^17.0.0"
+    "@chainsafe/libp2p-noise": "10.0.0",
+    "autocannon": "7.10.0",
+    "byte-size": "8.1.0",
+    "console-table-printer": "2.11.1",
+    "fastify": "4.9.2",
+    "get-port": "6.1.2",
+    "it-length-prefixed": "8.0.3",
+    "it-pipe": "2.0.4",
+    "libp2p": "0.40.0",
+    "@libp2p/mplex": "7.0.0",
+    "@libp2p/peer-id-factory": "1.0.19",
+    "@libp2p/websockets": "5.0.0",
+    "object-path": "0.11.8",
+    "p-queue": "7.3.0",
+    "pino": "8.7.0",
+    "pino-pretty": "9.1.1",
+    "protobufjs": "7.1.2",
+    "standard": "17.0.0"
   }
 }
