@@ -1,17 +1,17 @@
-'use strict'
 
-const fastify = require('fastify')
-const { Noise } = require('@web3-storage/libp2p-noise')
-const libp2p = require('libp2p')
-const Multiplex = require('libp2p-mplex')
-const Websockets = require('libp2p-websockets')
-const { CID } = require('multiformats/cid')
-const { sha256 } = require('multiformats/hashes/sha2')
-const { base58btc: base58 } = require('multiformats/bases/base58')
+import fastify from 'fastify'
+import { createLibp2p } from 'libp2p'
+import { webSockets } from '@libp2p/websockets'
+import { noise } from '@chainsafe/libp2p-noise'
+import { mplex } from '@libp2p/mplex'
+import { CID } from 'multiformats/cid'
+import { sha256 } from 'multiformats/hashes/sha2'
+import { base58btc as base58 } from 'multiformats/bases/base58'
+import getPort from 'get-port'
+import PQueue from 'p-queue'
 
-const { loadEsmModule } = require('../lib/esm-loader')
-const { Connection } = require('../lib/networking')
-const { protocols, Entry, Message, WantList, RawMessage } = require('../lib/protocol')
+import { Connection } from '../lib/networking.js'
+import { BITSWAP_V_120 as protocol, Entry, Message, WantList, RawMessage } from '../lib/protocol.js'
 
 const targets = {
   local: '/ip4/127.0.0.1/tcp/3000/ws/p2p/bafzbeia6mfzohhrwcvr3eaebk3gjqdwsidtfxhpnuwwxlpbwcx5z7sepei',
@@ -21,7 +21,6 @@ const targets = {
 }
 
 async function getFreePort () {
-  const getPort = await loadEsmModule('get-port')
   return getPort()
 }
 
@@ -31,7 +30,6 @@ const pendingRequests = {}
 
 // the proxy server is intended to run only for testing, not to be an ongoing service
 async function startProxy ({ target, concurrency = 8, port, name = 'default' }) {
-  const PQueue = await loadEsmModule('p-queue')
   const queue = new PQueue({ concurrency: parseInt(concurrency) })
   if (!port) {
     port = await getFreePort()
@@ -68,11 +66,10 @@ async function startProxy ({ target, concurrency = 8, port, name = 'default' }) 
     close: async () => {
       try {
         service.close()
-
         // TODO BUG? looks like it's not closing
         proxy.duplex.close()
         proxy.connections.map(c => c.close())
-
+        proxy.node.stop()        
         // TODO remove process.exit on proper connection closing
         process.exit(0)
       } catch (err) {
@@ -83,21 +80,19 @@ async function startProxy ({ target, concurrency = 8, port, name = 'default' }) 
 }
 
 async function proxyPeer ({ target, name }) {
-  const node = await libp2p.create({
-    modules: {
-      transport: [Websockets],
-      streamMuxer: [Multiplex],
-      connEncryption: [new Noise()] // no need custom crypto
-    }
+  const node = await createLibp2p({
+    transports: [webSockets()],
+    connectionEncryption: [noise()],
+    streamMuxers: [mplex()]
   })
 
   const multiaddr = target
   const dialConnection = await node.dial(multiaddr)
 
-  const { stream, protocol } = await dialConnection.newStream(protocols)
+  const stream = await dialConnection.newStream(protocol)
   const duplex = new Connection(stream)
 
-  node.handle(protocols, ({ connection: dialConnection, stream }) => {
+  node.handle(protocol, ({ stream }) => {
     const connection = new Connection(stream)
     proxy.connections.push(connection)
 
@@ -214,11 +209,11 @@ function proxyResponse ({ data, connection, name }) {
 
 function serialize (block, type) {
   return type === 'd'
-    ? { data: block.data.toString('base64') }
+    ? { data: Buffer.from(block.data).toString('base64') }
     : { info: block.type === 0 ? 'FOUND' : 'NOT-FOUND' }
 }
 
-module.exports = {
+export {
   targets,
   startProxy
 }

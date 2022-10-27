@@ -1,7 +1,6 @@
-'use strict'
 
-const fs = require('fs/promises')
-const path = require('path')
+import fs from 'fs/promises'
+import path from 'path'
 
 async function loadCases ({ dir, only }) {
   const files = await fs.readdir(dir)
@@ -26,6 +25,6 @@ async function loadCases ({ dir, only }) {
   return requests
 }
 
-module.exports = {
+export {
   loadCases
 }

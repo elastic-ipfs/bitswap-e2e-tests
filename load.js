@@ -1,12 +1,12 @@
-'use strict'
 
-const fs = require('fs/promises')
-const { mkdirSync } = require('fs')
-const path = require('path')
-const autocannon = require('autocannon')
+import fs from 'fs/promises'
+import { mkdirSync } from 'fs'
+import path from 'path'
+import autocannon from 'autocannon'
 
-const helper = require('./helper')
-const load = require('./helper/load')
+import * as helper from './helper/index.js'
+import * as load from './helper/load.js'
+import { dirname } from './lib/util.js'
 
 const PROXY_CONCURRENCY = process.env.PROXY_CONCURRENCY ? parseInt(process.env.PROXY_CONCURRENCY) : 8
 const TARGET_ENV = process.env.TARGET_ENV ?? 'local'
@@ -21,7 +21,7 @@ const RESULT_FILE = process.env.RESULT_FILE ?? 'result/load.json'
 
 async function test () {
   const requests = await load.loadCases({
-    dir: path.join(__dirname, './snaps', TEST_ENV, 'load'),
+    dir: path.join(dirname(import.meta.url), './snaps', TEST_ENV, 'load'),
     only: ONLY
   })
 
@@ -62,8 +62,8 @@ async function test () {
 }
 
 async function end ({ start, service, results }) {
-  const resultFile = path.join(__dirname, RESULT_FILE)
-  mkdirSync(path.dirname(resultFile), { recursive:true })
+  const resultFile = path.join(dirname(import.meta.url), RESULT_FILE)
+  mkdirSync(path.dirname(resultFile), { recursive: true })
   await fs.writeFile(resultFile, JSON.stringify(results, null, 2), 'utf8')
   console.log('done in ', Date.now() - start, 'ms')
   service.close()

@@ -1,6 +1,5 @@
-'use strict'
 
-const helper = require('./index')
+import helper from './index.js'
 
 process.env.TARGET = process.env.TARGET ?? 'local'
 
