@@ -4,8 +4,8 @@ The `Elastic IPFS` e2e test suite provides a set of tools for e2e testing.
 
 ## e2e testing `bitswap-peer` service
 
-There are 2 tests for `bitswap-peer`: `regression` and `load`.  
-One of the main capabilities of the bitswap peer is concurrency, so in order to test the correctness of the service, we need to test under concurrent requests.  
+There are 3 tests for `bitswap-peer`: `smoke`, `regression` and `load`.  
+While `smoke` test performs a single request to the bitswap service, in order to test one of the most important feature of the bitswap peer suche as concurrency, we need to test under concurrent requests.  
 The test stack is composed of `autocannon` and the `http-proxy`, built on top of `libp2p`, which means that every time the test run, an `http-proxy` instance is setup to target a `bitswap-peer` service or a cluster.
 
 ### How to run tests
@@ -16,15 +16,24 @@ Install node deps, please note node `v18` is required.
 npm i
 ```
 
-TODO npm auth
+- run smoke test
 
-Then run
+```bash
+npm run test:smoke -- zQmUGsfJPhJ6CLuvnvcdvJH5jc7Yxf19pSD1jRn9wbsPCBY data
+
+# get data for block
+npm run test:smoke -- $cid data 
+# get info for block
+npm run test:smoke -- $cid
+```
+
+- run regression test
 
 ```bash
 npm run test:regression
 ```
 
-or
+- run load test
 
 ```bash
 npm run test:load
@@ -40,6 +49,31 @@ node compare-results.js result/current-load-2.json result/next-load-2.json
 ```
 
 ---
+
+### Smoke test
+
+The purpose of the smoke test is to assert the service is able to receive a request and serve a response.  
+
+#### Options
+
+- **TARGET_ENV** (default `local`)
+
+See [targets](#targets)
+
+#### Examples
+
+Run in local with dev scenario (for local development)
+
+```bash
+npm run test:smoke -- zQmUGsfJPhJ6CLuvnvcdvJH5jc7Yxf19pSD1jRn9wbsPCBY data
+```
+
+Run in dev with dev scenario (for dev testing)
+
+```bash
+TARGET_ENV=dev npm run test:smoke -- zQmUGsfJPhJ6CLuvnvcdvJH5jc7Yxf19pSD1jRn9wbsPCBY data
+TARGET_ENV=dev npm run test:smoke -- zQmUGsfJPhJ6CLuvnvcdvJH5jc7Yxf19pSD1jRn9wbsPCBY
+```
 
 ### Regression test
 

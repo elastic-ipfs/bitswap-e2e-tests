@@ -11,7 +11,7 @@ import getPort from 'get-port'
 import PQueue from 'p-queue'
 
 import { Connection } from '../lib/networking.js'
-import { BITSWAP_V_120 as protocol, Entry, Message, WantList, RawMessage } from '../lib/protocol.js'
+import { BITSWAP_V_120 as protocol, Entry, Message, WantList, RawMessage, BlockPresence } from '../lib/protocol.js'
 
 const targets = {
   local: '/ip4/127.0.0.1/tcp/3000/ws/p2p/bafzbeia6mfzohhrwcvr3eaebk3gjqdwsidtfxhpnuwwxlpbwcx5z7sepei',
@@ -69,7 +69,7 @@ async function startProxy ({ target, concurrency = 8, port, name = 'default' }) 
         // TODO BUG? looks like it's not closing
         proxy.duplex.close()
         proxy.connections.map(c => c.close())
-        proxy.node.stop()        
+        proxy.node.stop()
         // TODO remove process.exit on proper connection closing
         process.exit(0)
       } catch (err) {
@@ -77,6 +77,19 @@ async function startProxy ({ target, concurrency = 8, port, name = 'default' }) 
       }
     }
   }
+}
+
+async function createClient ({ target, protocol }) {
+  const node = await createLibp2p({
+    transports: [webSockets()],
+    connectionEncryption: [noise()],
+    streamMuxers: [mplex()]
+  })
+  const dial = await node.dial(target)
+  const stream = await dial.newStream(protocol)
+  const connection = new Connection(stream)
+
+  return { node, connection }
 }
 
 async function proxyPeer ({ target, name }) {
@@ -213,7 +226,28 @@ function serialize (block, type) {
     : { info: block.type === 0 ? 'FOUND' : 'NOT-FOUND' }
 }
 
+function printResponse (message) {
+  const out = {
+    wantlist: message.wantlist,
+    blocks: message.blocks.map(b => ({
+      prefix: '[base64] ' + Buffer.from(b.prefix).toString('base64'),
+      data: '[base64] ' + Buffer.from(b.data).toString('base64').substring(0, 80) + '...',
+      '_data.length': b.data.length
+    })),
+    blockPresences: message.blockPresences.map(b => ({
+      cid: b.cid.toString(),
+      type: b.type === BlockPresence.Type.Have ? 'BlockPresence.Type.Have' : 'BlockPresence.Type.DontHave'
+    })),
+    pendingBytes: message.pendingBytes,
+    blocksSize: message.blocksSize
+  }
+
+  return JSON.stringify(out, null, 2)
+}
+
 export {
   targets,
-  startProxy
+  startProxy,
+  printResponse,
+  createClient
 }
