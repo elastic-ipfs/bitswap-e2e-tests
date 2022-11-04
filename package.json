@@ -7,6 +7,7 @@
   },
   "type": "module",
   "scripts": {
+    "test:smoke": "LOG_LEVEL=error LOG_PRETTY=1 node smoke.js",
     "test:regression": "LOG_LEVEL=error LOG_PRETTY=1 node regression.js",
     "test:load": "LOG_LEVEL=error LOG_PRETTY=1 node load.js",
     "format": "standard --fix",
