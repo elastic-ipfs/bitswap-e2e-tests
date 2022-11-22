@@ -13,11 +13,18 @@ async function test (cid, type) {
 
   console.log('creating peer client ...')
   console.log(`target: ${helper.targets[TARGET_ENV]}\n  protocol: ${protocol}`)
+  console.time('connected')
   const client = await helper.createClient({
     target: helper.targets[TARGET_ENV],
     protocol
   })
   console.log('client connected.')
+  console.timeEnd('connected')
+
+  const handlerOptions = {
+    maxInboundStreams: Infinity,
+    maxOutboundStreams: Infinity
+  }
 
   client.node.handle(protocol, async ({ stream }) => {
     const connection = new Connection(stream)
@@ -29,13 +36,15 @@ async function test (cid, type) {
       console.log('***')
       console.info(helper.printResponse(message))
       console.log('***')
+      console.timeEnd('response')
 
       end(client)
     })
-  })
+  }, handlerOptions)
 
   console.log(`sending request ${cid.toString()} ${type === Entry.WantType.Block ? 'WantType.Block' : 'WantType.Have'} ...`)
-  client.connection.send(
+  console.time('response')
+  client.link.send(
     new Message(
       new WantList(
         [new Entry(cid, 1, false, type, true)], true
@@ -47,10 +56,10 @@ async function test (cid, type) {
 function end (client) {
   client.node.stop()
   client.connection.close()
+  client.link.close()
+  client.stream.close()
 
   console.log('--- done')
-
-  process.exit(0)
 }
 
 test(process.argv[2], process.argv[3])

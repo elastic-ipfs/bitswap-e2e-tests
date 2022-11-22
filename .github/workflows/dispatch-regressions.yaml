@@ -24,7 +24,7 @@ jobs:
       - name: Setup NodeJS
         uses: actions/setup-node@v3
         with:
-          node-version: 18.11
+          node-version: 18.12
       - name: Restore cached dependencies
         uses: actions/cache@v3
         with:
