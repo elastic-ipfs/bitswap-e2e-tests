@@ -24,16 +24,12 @@ jobs:
       - name: Setup NodeJS
         uses: actions/setup-node@v3
         with:
-          node-version: 18.11
+          node-version: 18.12
       - name: Restore cached dependencies
         uses: actions/cache@v3
         with:
           path: node_modules
           key: node-modules-${{ hashFiles('package.json') }}
-      - name: npm auth
-        uses: jgierer12/npm-auth-gpr@v1
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
       - name: Install dependencies
         uses: bahmutov/npm-install@v1
       - name: Execute Regression Tests

@@ -96,7 +96,7 @@ Update snaps, instead of asserting.
 
 - **ONLY**
 
-Run the test with only the specific snap file, for example, `ONLY=single-block-data.json`
+Run the test with only the snap files that match the name, for example, `ONLY=single-block` will run both `single-block-info.json` and `single-block-data.json`
 
 - **VERBOSE** (default `false`)
 
@@ -129,7 +129,7 @@ TARGET_ENV=staging TEST_ENV=staging npm run test:regression
 Update results for single-block-data.json
 
 ```bash
-ONLY=single-block-data.json TARGET_ENV=dev UPDATE_SNAPS=1 npm run test:regression
+ONLY=single-block-data TARGET_ENV=dev UPDATE_SNAPS=1 npm run test:regression
 ```
 
 Run test only for single-block-data.json and add verbosity

@@ -20,26 +20,28 @@ const targets = {
   dev: '/dns4/elastic-dev.dag.house/tcp/443/wss/p2p/bafzbeia6mfzohhrwcvr3eaebk3gjqdwsidtfxhpnuwwxlpbwcx5z7sepei'
 }
 
-async function getFreePort () {
-  return getPort()
-}
-
 // pendingBlocks are never cleared because of concurrency
 const pendingBlocks = {}
 const pendingRequests = {}
+
+function debug (...args) {
+  // TODO doc
+  if (!process.env.DEBUG) { return }
+  console.info(...args)
+}
 
 // the proxy server is intended to run only for testing, not to be an ongoing service
 async function startProxy ({ target, concurrency = 8, port, name = 'default' }) {
   const queue = new PQueue({ concurrency: parseInt(concurrency) })
   if (!port) {
-    port = await getFreePort()
+    port = await getPort()
   }
 
   pendingBlocks[name] = new Map()
   pendingRequests[name] = new Map()
   const service = fastify({ logger: false })
 
-  const proxy = await proxyPeer({ target, name })
+  const proxy = await proxyPeer({ target, name, protocol })
 
   service.post('/', (request, response) => {
     if (!Array.isArray(request.body.blocks)) {
@@ -65,13 +67,12 @@ async function startProxy ({ target, concurrency = 8, port, name = 'default' }) 
     },
     close: async () => {
       try {
+        // close all the open connections
         service.close()
-        // TODO BUG? looks like it's not closing
-        proxy.duplex.close()
+        proxy.link.close()
         proxy.connections.map(c => c.close())
         proxy.node.stop()
-        // TODO remove process.exit on proper connection closing
-        process.exit(0)
+        proxy.connection.close()
       } catch (err) {
         console.err('ERROR on close', err)
       }
@@ -79,31 +80,17 @@ async function startProxy ({ target, concurrency = 8, port, name = 'default' }) 
   }
 }
 
-async function createClient ({ target, protocol }) {
-  const node = await createLibp2p({
-    transports: [webSockets()],
-    connectionEncryption: [noise()],
-    streamMuxers: [mplex()]
-  })
-  const dial = await node.dial(target)
-  const stream = await dial.newStream(protocol)
-  const connection = new Connection(stream)
+async function proxyPeer ({ target, name, protocol }) {
+  const node = await createP2pNode()
 
-  return { node, connection }
-}
+  const connection = await node.dial(target)
+  const stream = await connection.newStream(protocol)
+  const link = new Connection(stream)
 
-async function proxyPeer ({ target, name }) {
-  const node = await createLibp2p({
-    transports: [webSockets()],
-    connectionEncryption: [noise()],
-    streamMuxers: [mplex()]
-  })
-
-  const multiaddr = target
-  const dialConnection = await node.dial(multiaddr)
-
-  const stream = await dialConnection.newStream(protocol)
-  const duplex = new Connection(stream)
+  const options = {
+    maxInboundStreams: Infinity,
+    maxOutboundStreams: Infinity
+  }
 
   node.handle(protocol, ({ stream }) => {
     const connection = new Connection(stream)
@@ -116,18 +103,18 @@ async function proxyPeer ({ target, name }) {
     connection.on('error', error => {
       console.error({ error }, 'connection error')
     })
-  })
+  }, options)
 
-  const proxy = { node, duplex, protocol, connections: [] }
+  const proxy = { node, link, protocol, connections: [], connection }
   return proxy
 }
 
 function proxyRequest ({ proxy, blocks, request, response, name }) {
-  // console.debug(' +++ proxyRequest', request.id)
+  debug(' +++ proxyRequest', request.id)
   blocks = blocks.map(block => ({ cid: CID.parse(block.cid.trim()), type: block.type }))
 
   const pending = { response, data: {}, blocks: new Set() }
-  // console.debug('pendingRequests.set', request.id)
+  debug('pendingRequests.set', request.id)
   pendingRequests[name].set(request.id, pending)
 
   const entries = []
@@ -144,18 +131,18 @@ function proxyRequest ({ proxy, blocks, request, response, name }) {
     }
 
     pending.blocks.add(id)
-    // console.debug('pendingBlocks.get', id)
+    debug('pendingBlocks.get', id)
     const c = pendingBlocks[name].get(id)
     if (c) {
-      // console.debug('pendingBlocks.get - push', request.id)
+      debug('pendingBlocks.get - push', request.id)
       c.push(request.id)
     } else {
-      // console.debug('pendingBlocks.get - set', request.id)
+      debug('pendingBlocks.get - set', request.id)
       pendingBlocks[name].set(id, [request.id])
     }
   }
 
-  proxy.duplex.send(
+  proxy.link.send(
     new Message(new WantList(entries, false), [], [], 0).encode(proxy.protocol)
   )
 }
@@ -175,11 +162,12 @@ function proxyResponse ({ data, connection, name }) {
       prefix = 'i:'
     } else {
       cid = CID.create(block.prefix[0], block.prefix[1], sha256.digest(block.data)).toString()
+      // if (cid.startsWith('Qm')) {                cid = 'z' + cid      }
       prefix = 'd:'
     }
     let id = prefix + cid
 
-    // console.debug('pendingBlocks.get', id)
+    debug('pendingBlocks.get', id)
     let requestIds = pendingBlocks[name].get(id)
     if (!requestIds) {
       if (prefix === 'i:') {
@@ -190,6 +178,7 @@ function proxyResponse ({ data, connection, name }) {
       }
     }
     if (!requestIds) {
+      // console.log(pendingBlocks[name].values())
       console.error('!!! block not found in pending blocks', id)
       continue
     }
@@ -197,7 +186,7 @@ function proxyResponse ({ data, connection, name }) {
     let requestId
     while (requestIds.length > 0) {
       requestId = requestIds.shift()
-      // console.debug('pendingRequests.get', requestId)
+      debug('pendingRequests.get', requestId)
       const r = pendingRequests[name].get(requestId)
       if (!r) {
         console.error('!!! request not found for block', { requestId, id })
@@ -243,6 +232,41 @@ function printResponse (message) {
   }
 
   return JSON.stringify(out, null, 2)
+}
+
+async function createClient ({ target, protocol }) {
+  const node = await createP2pNode()
+  const connection = await node.dial(target)
+  const stream = await connection.newStream(protocol)
+  const link = new Connection(stream)
+
+  return { node, connection, link, stream }
+}
+
+// ERR_TOO_MANY_INBOUND_PROTOCOL_STREAMS
+async function createP2pNode () {
+  const node = await createLibp2p({
+    transports: [webSockets()],
+    connectionEncryption: [noise()],
+    streamMuxers: [mplex({
+      maxInboundStreams: Infinity,
+      maxOutboundStreams: Infinity,
+      maxStreamBufferSize: Infinity,
+      disconnectThreshold: Infinity
+    })],
+    connectionManager: {
+      maxConnections: Infinity,
+      minConnections: 0,
+      pollInterval: 30000,
+      inboundConnectionThreshold: Infinity,
+      maxIncomingPendingConnections: Infinity,
+      inboundUpgradeTimeout: 30000,
+      autoDial: false,
+      autoDialInterval: 30000
+    }
+  })
+  await node.start()
+  return node
 }
 
 export {

@@ -16,11 +16,9 @@ async function loadCases ({ dir, request, only, updateSnaps = false, verbose = f
   const verbosity = verbose ? print : noop
 
   for (const file of files) {
-    if (only) {
-      if (file !== only) {
-        console.info(' *** skip', file)
-        continue
-      }
+    if (only && !file.includes(only)) {
+      console.info(' *** skip', file)
+      continue
     }
     const filePath = path.join(dir, file)
     try {
