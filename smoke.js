@@ -2,7 +2,7 @@
 import { CID } from 'multiformats/cid'
 import * as helper from './helper/index.js'
 import { Connection } from './lib/networking.js'
-import { BITSWAP_V_120, Entry, Message, WantList } from './lib/protocol.js'
+import { BITSWAP_V_120, Entry, Message, WantList } from 'e-ipfs-core-lib'
 
 const TARGET_ENV = process.env.TARGET_ENV ?? 'local'
 const protocol = BITSWAP_V_120

@@ -162,7 +162,7 @@ The test scenarios to load, are defined in the `/snaps` folder; currently suppor
 
 Concurrent clients to run load test: for every client, will be run `TEST_CONNECTIONS` concurrent requests for `TEST_DURATION`.
 
-- **TEST_CONNECTIONS** (default `200`)
+- **TEST_CONNECTIONS** (default `50`)
 
 Concurrent connections for `autocannon`.
 
@@ -170,7 +170,7 @@ Concurrent connections for `autocannon`.
 
 Test duration, in seconds - so it will run N connections for X seconds.
 
-- **TEST_TIMEOUT** (default `5 mins`)
+- **TEST_TIMEOUT** (default `1 min`)
 
 Timeout for each response, in seconds.
 
