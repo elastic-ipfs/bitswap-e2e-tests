@@ -45,8 +45,8 @@ for (const group of [
 }
 
 // TODO env vars
-const LABEL1 = 'test #1'
-const LABEL2 = 'test #2'
+const LABEL1 = process.env.LABEL1 ?? 'test #1'
+const LABEL2 = process.env.LABEL2 ?? 'test #2'
 
 async function main (resultFile1, resultFile2) {
   const result1 = JSON.parse(await fs.readFile(path.join(process.cwd(), resultFile1), 'utf8'))
@@ -79,11 +79,12 @@ async function main (resultFile1, resultFile2) {
 
 function print (compare) {
   const p = new Table()
+  const diffLabel = `diff ${LABEL2} to ${LABEL1}`
 
   for (const row of compare) {
     p.addRow({
       measure: row.path,
-      diff: row.compare ? format(row.value) : '',
+      [diffLabel]: row.compare ? format(row.value) : '',
       [LABEL1]: value(row.v1, row.um),
       [LABEL2]: value(row.v2, row.um)
     }, { color: color(row.value, row.reverse, row.compare) })
