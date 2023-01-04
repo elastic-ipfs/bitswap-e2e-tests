@@ -33,6 +33,35 @@ npm run test:smoke -- $cid
 npm run test:regression
 ```
 
+- run liveness test
+
+```bash
+npm run test:liveness
+```
+
+TODO 
+```js
+required START_BITSWAP_PATH
+const REQUEST_TIMEOUT = process.env.TEST_REQUEST_TIMEOUT ? parseInt(process.env.TEST_REQUEST_TIMEOUT) : 100
+const REQUEST_RETRIES = process.env.TEST_REQUEST_RETRIES ? parseInt(process.env.TEST_REQUEST_RETRIES) : 50
+const BITSWAP_HOST = process.env.TEST_BITSWAP_HOST ?? 'http://localhost:3001'
+```
+
+- run readiness test
+
+```bash
+npm run test:readiness
+```
+
+```js
+optional START_BITSWAP_PATH
+TARGET_ENV
+TEST_ENV
+const REQUEST_TIMEOUT = process.env.TEST_REQUEST_TIMEOUT ? parseInt(process.env.TEST_REQUEST_TIMEOUT) : 100
+const REQUEST_RETRIES = process.env.TEST_REQUEST_RETRIES ? parseInt(process.env.TEST_REQUEST_RETRIES) : 50
+const BITSWAP_HOST = process.env.TEST_BITSWAP_HOST ?? 'http://localhost:3001'
+```
+
 - run load test
 
 ```bash

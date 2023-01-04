@@ -243,7 +243,13 @@ async function createClient ({ target, protocol }) {
   return { node, connection, link, stream }
 }
 
-// ERR_TOO_MANY_INBOUND_PROTOCOL_STREAMS
+function endClient (client) {
+  client.node.stop()
+  client.connection.close()
+  client.link.close()
+  client.stream.close()
+}
+
 async function createP2pNode () {
   const node = await createLibp2p({
     transports: [webSockets()],
@@ -273,5 +279,6 @@ export {
   targets,
   startProxy,
   printResponse,
-  createClient
+  createClient,
+  endClient
 }

@@ -54,10 +54,7 @@ async function test (cid, type) {
 }
 
 function end (client) {
-  client.node.stop()
-  client.connection.close()
-  client.link.close()
-  client.stream.close()
+  helper.endClient(client)
 
   console.log('--- done')
 }
