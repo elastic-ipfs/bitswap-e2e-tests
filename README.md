@@ -4,7 +4,7 @@ The `Elastic IPFS` e2e test suite provides a set of tools for e2e testing.
 
 ## e2e testing `bitswap-peer` service
 
-There are 3 tests for `bitswap-peer`: `smoke`, `regression` and `load`.  
+There are 5 tests for `bitswap-peer`: `smoke`, `regression`, `liveness`, `readiness` and `load`.  
 While `smoke` test performs a single request to the bitswap service, in order to test one of the most important feature of the bitswap peer suche as concurrency, we need to test under concurrent requests.  
 The test stack is composed of `autocannon` and the `http-proxy`, built on top of `libp2p`, which means that every time the test run, an `http-proxy` instance is setup to target a `bitswap-peer` service or a cluster.
 
@@ -33,6 +33,18 @@ npm run test:smoke -- $cid
 npm run test:regression
 ```
 
+- run liveness test
+
+```bash
+START_BITSWAP_PATH=/path/to/bitswap npm run test:liveness
+```
+
+- run readiness test
+
+```bash
+npm run test:readiness
+```
+
 - run load test
 
 ```bash
@@ -40,6 +52,7 @@ npm run test:load
 ```
 
 #### compare results
+It's possible to compare results for regression and load tests
 
 ```bash
 node compare-results.js result/current-regression-1.json result/next-regression-1.json
@@ -74,6 +87,8 @@ Run in dev with dev scenario (for dev testing)
 TARGET_ENV=dev npm run test:smoke -- zQmUGsfJPhJ6CLuvnvcdvJH5jc7Yxf19pSD1jRn9wbsPCBY data
 TARGET_ENV=dev npm run test:smoke -- zQmUGsfJPhJ6CLuvnvcdvJH5jc7Yxf19pSD1jRn9wbsPCBY
 ```
+
+---
 
 ### Regression test
 
@@ -140,13 +155,101 @@ ONLY=single-block-data.json TARGET_ENV=dev VERBOSE=1 npm run test:regression
 
 ---
 
+### Liveness test
+
+The purpose of the liveness test is to assert the service starts and respond properly to `/liveness` as soon as it is ready.  
+For this reason, the bitswap service must be available to be run and set to `START_BITSWAP_PATH`.  
+The fails if `/liveness` does not respond with a success (HTTP 200) in `REQUEST_TIMEOUT` * `TEST_REQUEST_RETRIES`.
+
+#### Options
+
+- **REQUEST_TIMEOUT** (default `100 ms`)
+
+Timeout of each request.
+
+- **REQUEST_RETRIES** (default `50`)
+
+Max retries.
+
+- **BITSWAP_HOST** (default `http://localhost:3001`)
+
+Bitswap http host location.
+
+#### Examples
+
+Test local service.
+
+```bash
+START_BITSWAP_PATH=/code/ipfs/bitswap-peer npm run test:liveness
+```
+
+Test local service with 10 retries every 500ms.
+
+```bash
+REQUEST_TIMEOUT=500 REQUEST_RETRIES=10 START_BITSWAP_PATH=/code/ipfs/bitswap-peer npm run test:liveness
+```
+
+---
+
+### Readiness test
+
+Test the readiness logic with low and high traffic, to check service readiness going on and off.  
+
+```bash
+npm run test:readiness
+```
+
+#### Options
+
+- **START_BITSWAP_PATH**
+
+Optionally start (and stop) the bitswap service locally; if so, bitswap service readiness limits are set to:
+
+`READINESS_MAX_CONNECTIONS` 5  
+`READINESS_MAX_PENDING_REQUEST_BLOCKS` 100  
+`READINESS_MAX_EVENT_LOOP_UTILIZATION` 0.8  
+
+- **TARGET_ENV** (default `local`)
+
+See [targets](#targets)
+
+- **TEST_ENV** (default `dev`)
+
+The test scenarios to load, are defined in the `/snaps` folder; currently supported values: `dev`, `staging`.
+
+- **REQUEST_TIMEOUT** (default `100 ms`)
+
+Timeout of each request.
+
+- **REQUEST_RETRIES** (default `50`)
+
+Max retries.
+
+- **BITSWAP_HOST** (default `http://localhost:3001`)
+
+Bitswap http host location.
+
+#### Examples
+
+Test local service.
+
+```bash
+START_BITSWAP_PATH=/code/ipfs/bitswap-peer npm run test:readiness
+```
+
+Test local service with 10 retries every 500ms.
+
+```bash
+REQUEST_TIMEOUT=500 REQUEST_RETRIES=10 START_BITSWAP_PATH=/code/ipfs/bitswap-peer npm run test:readiness
+```
+
+---
+
 ### Load test
 
-The purpose of the regression test is to assert the system can handle a huge peek of traffic.  
+The purpose of the load test is to assert the system can handle a huge peek of traffic.  
 Note that the test expects the service to respond, but it doesn't assert the correctness of such responses.  
 The default options will run a load test against the local `bitswap-peer` service assuming it's pointing to `dev` storage.
-
-**Note** current default settings (5 clients x 200 connections x 30 secs) are the current reference (in `dev`).
 
 #### Options
 
@@ -162,7 +265,7 @@ The test scenarios to load, are defined in the `/snaps` folder; currently suppor
 
 Concurrent clients to run load test: for every client, will be run `TEST_CONNECTIONS` concurrent requests for `TEST_DURATION`.
 
-- **TEST_CONNECTIONS** (default `200`)
+- **TEST_CONNECTIONS** (default `50`)
 
 Concurrent connections for `autocannon`.
 
@@ -170,7 +273,7 @@ Concurrent connections for `autocannon`.
 
 Test duration, in seconds - so it will run N connections for X seconds.
 
-- **TEST_TIMEOUT** (default `5 mins`)
+- **TEST_TIMEOUT** (default `1 min`)
 
 Timeout for each response, in seconds.
 

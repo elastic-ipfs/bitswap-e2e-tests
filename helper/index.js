@@ -11,7 +11,7 @@ import getPort from 'get-port'
 import PQueue from 'p-queue'
 
 import { Connection } from '../lib/networking.js'
-import { BITSWAP_V_120 as protocol, Entry, Message, WantList, RawMessage, BlockPresence } from '../lib/protocol.js'
+import { BITSWAP_V_120 as protocol, Entry, Message, WantList, RawMessage, BlockPresence } from 'e-ipfs-core-lib'
 
 const targets = {
   local: '/ip4/127.0.0.1/tcp/3000/ws/p2p/bafzbeia6mfzohhrwcvr3eaebk3gjqdwsidtfxhpnuwwxlpbwcx5z7sepei',
@@ -243,7 +243,13 @@ async function createClient ({ target, protocol }) {
   return { node, connection, link, stream }
 }
 
-// ERR_TOO_MANY_INBOUND_PROTOCOL_STREAMS
+function endClient (client) {
+  client.node.stop()
+  client.connection.close()
+  client.link.close()
+  client.stream.close()
+}
+
 async function createP2pNode () {
   const node = await createLibp2p({
     transports: [webSockets()],
@@ -273,5 +279,6 @@ export {
   targets,
   startProxy,
   printResponse,
-  createClient
+  createClient,
+  endClient
 }

@@ -6,7 +6,7 @@ import autocannon from 'autocannon'
 
 import * as helper from './helper/index.js'
 import * as regression from './helper/regression.js'
-import { dirname } from './lib/util.js'
+import { dirname } from 'e-ipfs-core-lib'
 
 const TARGET_ENV = process.env.TARGET_ENV ?? 'local'
 const TEST_ENV = process.env.TEST_ENV ?? 'dev'

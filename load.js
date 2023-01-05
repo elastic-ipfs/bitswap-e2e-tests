@@ -6,7 +6,7 @@ import autocannon from 'autocannon'
 
 import * as helper from './helper/index.js'
 import * as load from './helper/load.js'
-import { dirname } from './lib/util.js'
+import { dirname } from 'e-ipfs-core-lib'
 
 const PROXY_CONCURRENCY = process.env.PROXY_CONCURRENCY ? parseInt(process.env.PROXY_CONCURRENCY) : 8
 const TARGET_ENV = process.env.TARGET_ENV ?? 'local'
@@ -15,8 +15,8 @@ const TEST_ENV = process.env.TEST_ENV ?? 'dev'
 const TEST_CLIENTS = process.env.TEST_CLIENTS ? parseInt(process.env.TEST_CLIENTS) : 5
 const TEST_DURATION = process.env.TEST_DURATION ? parseInt(process.env.TEST_DURATION) : 30 // sec
 const TEST_AMOUNT = process.env.TEST_AMOUNT ? parseInt(process.env.TEST_AMOUNT) : undefined
-const TEST_CONNECTIONS = process.env.TEST_CONNECTIONS ? parseInt(process.env.TEST_CONNECTIONS) : 200
-const TEST_TIMEOUT = process.env.TEST_TIMEOUT ? parseInt(process.env.TEST_TIMEOUT) : 5 * 60 // sec
+const TEST_CONNECTIONS = process.env.TEST_CONNECTIONS ? parseInt(process.env.TEST_CONNECTIONS) : 50
+const TEST_TIMEOUT = process.env.TEST_TIMEOUT ? parseInt(process.env.TEST_TIMEOUT) : 60 // sec
 const RESULT_FILE = process.env.RESULT_FILE ?? 'result/load.json'
 
 async function test () {
