@@ -48,13 +48,10 @@ export async function teardownService () {
   await stopBitswapService(service)
 }
 
-// TODO (long) timeout
+// TODO (long) timeout limit
 export async function waitServiceToBeUnloaded ({ bitswapHost, requestTimeout }) {
   // eslint-disable-next-line no-unmodified-loop-condition
   while (pendings > 0 && responses < pendings) {
-    // console.log('responses < pendings', responses, pendings)
-    // const load = JSON.parse((await request({ url: `${bitswapHost}/load`, timeout: requestTimeout, retries: 1 })).body)
-    // console.log({ load })
     await sleep(500)
   }
 
