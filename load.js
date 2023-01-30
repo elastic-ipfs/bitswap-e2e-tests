@@ -18,6 +18,7 @@ const TEST_AMOUNT = process.env.TEST_AMOUNT ? parseInt(process.env.TEST_AMOUNT) 
 const TEST_CONNECTIONS = process.env.TEST_CONNECTIONS ? parseInt(process.env.TEST_CONNECTIONS) : 200
 const TEST_TIMEOUT = process.env.TEST_TIMEOUT ? parseInt(process.env.TEST_TIMEOUT) : 5 * 60 // sec
 const RESULT_FILE = process.env.RESULT_FILE ?? 'result/load.json'
+const MUXERS = process.env.MUXERS ? process.env.MUXERS.split(',') : ['mplex', 'yamux']
 
 async function test () {
   const requests = await load.loadCases({
@@ -34,7 +35,8 @@ async function test () {
     const service = await helper.startProxy({
       target: helper.targets[TARGET_ENV],
       concurrency: PROXY_CONCURRENCY,
-      name: i + 1
+      name: i + 1,
+      muxers: MUXERS
     })
 
     console.log(` *** running #${i + 1} ...`)

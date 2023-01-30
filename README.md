@@ -60,6 +60,10 @@ The purpose of the smoke test is to assert the service is able to receive a requ
 
 See [targets](#targets)
 
+- **MUXERS** (default `mplex,yamux`)
+
+TODO
+
 #### Examples
 
 Run in local with dev scenario (for local development)
@@ -73,6 +77,9 @@ Run in dev with dev scenario (for dev testing)
 ```bash
 TARGET_ENV=dev npm run test:smoke -- zQmUGsfJPhJ6CLuvnvcdvJH5jc7Yxf19pSD1jRn9wbsPCBY data
 TARGET_ENV=dev npm run test:smoke -- zQmUGsfJPhJ6CLuvnvcdvJH5jc7Yxf19pSD1jRn9wbsPCBY
+TARGET_ENV=dev MUXERS=yamux npm run test:smoke -- zQmUGsfJPhJ6CLuvnvcdvJH5jc7Yxf19pSD1jRn9wbsPCBY
+TARGET_ENV=dev MUXERS=yamux,mplex npm run test:smoke -- zQmUGsfJPhJ6CLuvnvcdvJH5jc7Yxf19pSD1jRn9wbsPCBY
+TARGET_ENV=dev MUXERS=mplex npm run test:smoke -- zQmUGsfJPhJ6CLuvnvcdvJH5jc7Yxf19pSD1jRn9wbsPCBY
 ```
 
 ### Regression test
@@ -105,6 +112,10 @@ Enable verbosity on assertions.
 - **RESULT_FILE** (default `result/regression.json`)
 
 Path to save json result file from `autocannon`, to be used in comparison.
+
+- **MUXERS** (default `mplex,yamux`)
+
+TODO
 
 #### Examples
 
