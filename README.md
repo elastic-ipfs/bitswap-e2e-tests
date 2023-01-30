@@ -62,7 +62,7 @@ See [targets](#targets)
 
 - **MUXERS** (default `mplex,yamux`)
 
-TODO
+Select stream muxers to use for the client, possible values are `mplex`, `yamux`. Default is both.
 
 #### Examples
 
@@ -115,7 +115,7 @@ Path to save json result file from `autocannon`, to be used in comparison.
 
 - **MUXERS** (default `mplex,yamux`)
 
-TODO
+Select stream muxers to use for the client, possible values are `mplex`, `yamux`. Default is both.
 
 #### Examples
 
@@ -192,6 +192,10 @@ It overrides `duration`.
 - **RESULT_FILE** (default `result/load.json`)
 
 Path to save json result file from `autocannon`, to be used in comparison.
+
+- **MUXERS** (default `mplex,yamux`)
+
+Select stream muxers to use for the client, possible values are `mplex`, `yamux`. Default is both.
 
 #### Examples
 
