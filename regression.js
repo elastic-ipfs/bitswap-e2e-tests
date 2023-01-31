@@ -15,11 +15,13 @@ const ONLY = process.env.ONLY
 const VERBOSE = !!process.env.VERBOSE
 const PROXY_CONCURRENCY = process.env.PROXY_CONCURRENCY ? parseInt(process.env.PROXY_CONCURRENCY) : 8
 const RESULT_FILE = process.env.RESULT_FILE ?? 'result/regression.json'
+const MUXERS = process.env.MUXERS ? process.env.MUXERS.split(',') : ['mplex', 'yamux']
 
 async function test () {
   const service = await helper.startProxy({
     target: helper.targets[TARGET_ENV],
-    concurrency: PROXY_CONCURRENCY
+    concurrency: PROXY_CONCURRENCY,
+    muxers: MUXERS
   })
 
   const c = await regression.loadCases({

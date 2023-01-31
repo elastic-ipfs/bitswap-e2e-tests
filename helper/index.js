@@ -4,6 +4,7 @@ import { createLibp2p } from 'libp2p'
 import { webSockets } from '@libp2p/websockets'
 import { noise } from '@chainsafe/libp2p-noise'
 import { mplex } from '@libp2p/mplex'
+import { yamux } from '@chainsafe/libp2p-yamux'
 import { CID } from 'multiformats/cid'
 import { sha256 } from 'multiformats/hashes/sha2'
 import { base58btc as base58 } from 'multiformats/bases/base58'
@@ -31,7 +32,7 @@ function debug (...args) {
 }
 
 // the proxy server is intended to run only for testing, not to be an ongoing service
-async function startProxy ({ target, concurrency = 8, port, name = 'default' }) {
+async function startProxy ({ target, concurrency = 8, port, name = 'default', muxers }) {
   const queue = new PQueue({ concurrency: parseInt(concurrency) })
   if (!port) {
     port = await getPort()
@@ -41,7 +42,7 @@ async function startProxy ({ target, concurrency = 8, port, name = 'default' }) 
   pendingRequests[name] = new Map()
   const service = fastify({ logger: false })
 
-  const proxy = await proxyPeer({ target, name, protocol })
+  const proxy = await proxyPeer({ target, name, protocol, muxers })
 
   service.post('/', (request, response) => {
     if (!Array.isArray(request.body.blocks)) {
@@ -80,8 +81,8 @@ async function startProxy ({ target, concurrency = 8, port, name = 'default' }) 
   }
 }
 
-async function proxyPeer ({ target, name, protocol }) {
-  const node = await createP2pNode()
+async function proxyPeer ({ target, name, protocol, muxers }) {
+  const node = await createP2pNode({ muxers })
 
   const connection = await node.dial(target)
   const stream = await connection.newStream(protocol)
@@ -234,8 +235,8 @@ function printResponse (message) {
   return JSON.stringify(out, null, 2)
 }
 
-async function createClient ({ target, protocol }) {
-  const node = await createP2pNode()
+async function createClient ({ target, protocol, muxers }) {
+  const node = await createP2pNode({ muxers })
   const connection = await node.dial(target)
   const stream = await connection.newStream(protocol)
   const link = new Connection(stream)
@@ -244,16 +245,11 @@ async function createClient ({ target, protocol }) {
 }
 
 // ERR_TOO_MANY_INBOUND_PROTOCOL_STREAMS
-async function createP2pNode () {
+async function createP2pNode ({ muxers }) {
   const node = await createLibp2p({
     transports: [webSockets()],
     connectionEncryption: [noise()],
-    streamMuxers: [mplex({
-      maxInboundStreams: Infinity,
-      maxOutboundStreams: Infinity,
-      maxStreamBufferSize: Infinity,
-      disconnectThreshold: Infinity
-    })],
+    streamMuxers: createMuxers(muxers),
     connectionManager: {
       maxConnections: Infinity,
       minConnections: 0,
@@ -267,6 +263,22 @@ async function createP2pNode () {
   })
   await node.start()
   return node
+}
+
+function createMuxers (muxers) {
+  const streamMuxers = []
+  if (muxers.includes('mplex')) {
+    streamMuxers.push(mplex({
+      maxInboundStreams: Infinity,
+      maxOutboundStreams: Infinity,
+      maxStreamBufferSize: Infinity,
+      disconnectThreshold: Infinity
+    }))
+  }
+  if (muxers.includes('yamux')) {
+    streamMuxers.push(yamux({ client: true }))
+  }
+  return streamMuxers
 }
 
 export {

@@ -5,6 +5,7 @@ import { Connection } from './lib/networking.js'
 import { BITSWAP_V_120, Entry, Message, WantList } from './lib/protocol.js'
 
 const TARGET_ENV = process.env.TARGET_ENV ?? 'local'
+const MUXERS = process.env.MUXERS ? process.env.MUXERS.split(',') : ['mplex', 'yamux']
 const protocol = BITSWAP_V_120
 
 async function test (cid, type) {
@@ -16,7 +17,8 @@ async function test (cid, type) {
   console.time('connected')
   const client = await helper.createClient({
     target: helper.targets[TARGET_ENV],
-    protocol
+    protocol,
+    muxers: MUXERS
   })
   console.log('client connected.')
   console.timeEnd('connected')
